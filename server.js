@@ -1,6 +1,9 @@
 import express from 'express';
 import connectDatabase from './config/db';
 import { check, validationResult } from 'express-validator';
+import { cors } from 'cors';
+import bcrypt from 'bcryptjs';
+import User from './models/User';
 
 // Initialize express application
 const app = express();
@@ -10,6 +13,13 @@ connectDatabase();
 
 // Configure middleware
 app.use(express.json({ extended: false }));
+app.use(
+    cors({
+        origin: 'http://localhost:3000'
+
+    })
+
+);
 
 // API endpoints
 /*
@@ -38,14 +48,52 @@ app.post(
         check('email', 'Please enter a valid email').isEmail()
 
     ],
-    (req, res) => {
+    async (req, res) => {
         const errors = validationResult(req);
 
         if(!errors.isEmpty()) {
             return res.status(422).json({ errors: errors.array() });
 
         } else {
-            return res.send(req.body);
+            const { name, password, role, email } = req.body;
+
+            try {
+                //Check if user exists
+                let user = await User.findOneAndDelete({ email: email });
+
+                if(user) {
+                    return res
+                        .status(400)
+                        .json({ errors: [{ msg: 'User already exists' }] });
+
+                }
+
+                //Create a new user
+                user = new User({
+                    name: name,
+                    password: password,
+                    role: role,
+                    email: email
+
+                });
+
+                //Encrypt the password
+                const salt = await bcrypt.genSalt(10);
+                user.password = await bcrypt.hash(password, salt);
+
+                console.log("0")
+
+                //Save to the db and return
+                await user.save();
+
+                console.log("1");
+
+                res.send('User successfully registered');
+
+            } catch(error) {
+                res.status(500).send('Server error');
+
+            }
 
         }
 
@@ -54,5 +102,5 @@ app.post(
 );
 
 // Connection listener
-const port = 3000;
+const port = 5000;
 app.listen(port, () => console.log(`Server running on port ${port}`));
