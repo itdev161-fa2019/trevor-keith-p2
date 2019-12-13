@@ -88,12 +88,8 @@ app.post(
                 const salt = await bcrypt.genSalt(10);
                 user.password = await bcrypt.hash(password, salt);
 
-                console.log('0');
-
                 // Save to the db and return
                 await user.save();
-
-                console.log('1');
                 
                 //Generate and return a JWT token
                 returnToken(user, res);
