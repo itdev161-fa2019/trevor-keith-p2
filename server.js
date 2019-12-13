@@ -1,7 +1,7 @@
 import express from 'express';
 import connectDatabase from './config/db';
 import { check, validationResult } from 'express-validator';
-import { cors } from 'cors';
+import cors from 'cors';
 import bcrypt from 'bcryptjs';
 import User from './models/User';
 
@@ -38,14 +38,22 @@ app.get('/', (req, res) =>
 app.post(
     '/api/users',
     [
-        check('name', 'Please enter your name').not().isEmpty(),
+        check('name', 'Please enter your name')
+            .not()
+            .isEmpty(),
 
-        check('password', 'Please enter a password').not().isEmpty(),
-        check('password', 'Please enter a password with 8 or more characters').isLength({ min: 6 }),
+        check('password', 'Please enter a password')
+            .not()
+            .isEmpty(),
+        check('password', 'Please enter a password with 8 or more characters')
+            .isLength({ min: 6 }),
 
-        check('role', 'Please enter a valid role').not().isEmpty(),
+        check('role', 'Please enter a valid role')
+            .not()
+            .isEmpty(),
 
-        check('email', 'Please enter a valid email').isEmail()
+        check('email', 'Please enter a valid email')
+            .isEmail()
 
     ],
     async (req, res) => {
@@ -59,7 +67,7 @@ app.post(
 
             try {
                 //Check if user exists
-                let user = await User.findOneAndDelete({ email: email });
+                let user = await User.findOne({ email: email });
 
                 if(user) {
                     return res
@@ -81,12 +89,8 @@ app.post(
                 const salt = await bcrypt.genSalt(10);
                 user.password = await bcrypt.hash(password, salt);
 
-                console.log("0")
-
                 //Save to the db and return
                 await user.save();
-
-                console.log("1");
 
                 res.send('User successfully registered');
 
