@@ -6,6 +6,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import config from 'config';
 import User from './models/User';
+import auth from './middleware/auth';
 
 // Initialize express application
 const app = express();
@@ -34,16 +35,107 @@ app.get('/', (req, res) =>
 );
 
 /**
+ * @route GET api/auth
+ * @desc Authenticate user
+ */
+app.get(
+    '/api/auth',
+    auth,
+    async(req, res) => {
+        try {
+            const user = await User.findById(req.user.id);
+            res.status(200).json(user);
+
+        } catch(error) {
+            res.status(500).send('Unknown server error');
+            console.log(error);
+
+        }
+
+    }
+
+);
+
+/**
+ * @route POST api/login
+ * @desc Login user
+ */
+app.post(
+    '/api/login',
+    [
+        check('email', 'Please enter an email')
+            .not()
+            .isEmpty(),
+        check('email', 'Please enter a valid email')
+            .isEmail(),
+        
+        check('password', 'Please enter your password')
+            .not()
+            .isEmpty(),
+        check('password', 'Passwords are at least 6 characters')
+            .isLength({ min: 6 })
+
+    ],
+    async(req, res) => {
+        const errors = validationResult(req);
+
+        if(!errors.isEmpty()) {
+            return res
+                .status(422)
+                .json({ errors: errors.array() });
+
+        } else {
+            const { email, password } = req.body;
+
+            try {
+                //Check if user exists
+                let user = await User.findOne({ email: email });
+
+                if(!user) {
+                    return res
+                        .status(400)
+                        .json({ errors: [{ msg: 'Invalid email or password' }] });
+
+                }
+
+                //Check password
+                const match = await bcrypt.compare(password, user.password);
+
+                if(!match) {
+                    return res
+                        .status(400)
+                        .json({ errors: [{ msg: 'Invalid email or password' }] });
+
+                }
+
+                //Generate and return a JWT token
+                returnToken(user, res);
+
+            } catch(error) {
+                res.status(500).send('Server error');
+
+            }
+
+        }
+
+    }
+
+);
+
+/**
  *  @route POST api/users
  *  @desc Register user
  */
 app.post(
     '/api/users',
     [
-        check('name', 'Please enter your name')
+        check('name', 'Please enter a name')
             .not()
             .isEmpty(),
 
+        check('password', 'Please enter a password')
+            .not()
+            .isEmpty(),
         check('password', 'Please enter a password with 6 or more characters')
             .isLength({ min: 6 }),
 
@@ -51,9 +143,10 @@ app.post(
             .not()
             .isEmpty(),
 
-        check('email', 'Please enter a valid email')
+        check('email', 'Please enter an email')
             .not()
-            .isEmpty()
+            .isEmpty(),
+        check('email', 'Please enter a valid email')
             .isEmail()
 
     ],
