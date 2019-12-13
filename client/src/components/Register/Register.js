@@ -11,7 +11,7 @@ const Register = () => {
 
     });
 
-    const { name, email, password, passwordConfirm } = userData;
+    const { name, password, passwordConfirm, role, email } = userData;
 
     const onChange = e => {
         const { name, value } = e.target;
@@ -31,8 +31,9 @@ const Register = () => {
         } else {
             const newUser = {
                 name: name,
-                email: email,
-                password: password
+                password: password,
+                role: role,
+                email: email
 
             }
 
@@ -86,7 +87,7 @@ const Register = () => {
                 <input
                     type="password"
                     placeholder="Confirm Password"
-                    name="name"
+                    name="passwordConfirm"
                     value={passwordConfirm}
                     onChange={e => onChange(e)} />
             </div>
