@@ -25,7 +25,7 @@ app.use(
 );
 
 // API endpoints
-/*
+/**
  * @route GET
  * @desc Test endpoint
 */
@@ -191,6 +191,44 @@ app.post(
                 res.status(500).send('Server error');
 
             }
+
+        }
+
+    }
+
+);
+
+/**
+ * @route DELETE api/users
+ * @desc Delete current user
+ */
+app.delete(
+    '/api/users/:email',
+    auth,
+    async(req, res) => {
+        try {
+            const user = await User.findByEmail(req.params.email);
+
+            //Make sure the user was found
+            if(!user) {
+                return res.status(404).json({ msg: 'User not found' });
+
+            }
+
+            //Make sure the current user has permission to delete users
+            if(req.user.role !== "admin") {
+                return res.status(401).json({ msg: 'User not authorized' });
+
+            }
+
+            await user.remove();
+
+            res.json({ msg: 'Post removed' });
+
+        } catch(error) {
+            console.error(error);
+
+            res.status(500).send('Server error');
 
         }
 
