@@ -31,9 +31,9 @@ const Delete = () => {
         };
 
         axios
-            .delete(`http://localhost:5000/api/users/${user.email}`, config)
+            .delete(`http://localhost:5000/api/users/${userData.email}`, config)
             .catch(error => {
-                console.error(`Error deleting user: ${user}`);
+                console.error(`Error deleting user: ${userData.email}`);
 
             });
 

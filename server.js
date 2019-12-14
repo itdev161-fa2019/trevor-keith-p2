@@ -215,6 +215,8 @@ app.delete(
 
             }
 
+            console.log("0");
+
             //Make sure the current user has permission to delete users
             if(req.user.role !== "admin" && req.user.email !== res.user.email) {
                 return res.status(401).json({ msg: 'User not authorized' });
