@@ -3,6 +3,7 @@ import axios from 'axios';
 import './App.css';
 import {BrowserRouter as Router, Switch, Route, Link } from 'react-router-dom';
 import Register from './components/Register/Register';
+import Delete from './components/Delete/Delete';
 import Login from './components/Login/Login';
 
 class App extends React.Component {
@@ -95,7 +96,13 @@ class App extends React.Component {
                 <Link to="/">Home</Link>
               </li>
               <li>
-                <Link to="/register">Register</Link>
+                {user ? (
+                  <Link to="/delete">Delete</Link>
+
+                ) : (
+                  <Link to="/register">Register</Link>
+
+                )}
               </li>
               <li>
                 {user ? (
@@ -130,6 +137,10 @@ class App extends React.Component {
               <Route
                 exact path="/register"
                 render={() => <Register {...authProps} />}
+              />
+              <Route
+                exact path="/delete"
+                render={() => <Delete/>}
               />
               <Route
                 exact path="/login"

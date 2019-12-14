@@ -79,7 +79,7 @@ const Login = ({ authenticateUser }) => {
             </div>
             <div>
                 <input
-                    type="text"
+                    type="password"
                     placeholder="Password"
                     name="password"
                     value={password}
