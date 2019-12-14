@@ -199,15 +199,15 @@ app.post(
 );
 
 /**
- * @route DELETE api/users
- * @desc Delete current user
+ * @route DELETE api/users/:email
+ * @desc Delete user
  */
 app.delete(
     '/api/users/:email',
     auth,
     async(req, res) => {
         try {
-            const user = await User.findByEmail(req.params.email);
+            const user = await User.findByEmail(res.params.email);
 
             //Make sure the user was found
             if(!user) {
@@ -216,7 +216,7 @@ app.delete(
             }
 
             //Make sure the current user has permission to delete users
-            if(req.user.role !== "admin") {
+            if(req.user.role !== "admin" && req.user.email !== res.user.email) {
                 return res.status(401).json({ msg: 'User not authorized' });
 
             }
